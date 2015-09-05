@@ -9,7 +9,7 @@
 </head>
 
 <body style="margin: 0px; padding: 0px;">
-<?	if(!isset($_POST['Submit'])) {	?>
+<?php 	if(!isset($_POST['Submit'])) {	?>
 	<form action="" method="POST" enctype="multipart/form-data" target="_blank" >
 		<table width="100%" border=0 cellpadding="4" cellspacing="2" class="body">
 			<tr>
@@ -24,8 +24,8 @@
 			</tr>
 		</table>
 	</form>
-<?	}else{	?>
-		<iframe src="<?=$_POST['url'];?>" name="output" width="100%" height="100%" frameborder=0></iframe>
-<?	}	?>
+<?php 	}else{	?>
+		<iframe src="<?php echo $_POST['url'];?>" name="output" width="100%" height="100%" frameborder=0></iframe>
+<?php 	}	?>
 </body>
 </html>

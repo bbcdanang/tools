@@ -7,11 +7,11 @@ if(!isset($_POST['Submit']))
 	<table width="100%" border=0 cellpadding="4" cellspacing="2" class="body">
 		<tr bgcolor=#f0f0f0>
 			<td valign="middle" width="20%">action</td>
-			<td><input type="text" name="action" value="<?=@$_SESSION['CURLOPT_ACTION'];?>" size=40></td>
+			<td><input type="text" name="action" value="<?php echo @$_SESSION['CURLOPT_ACTION'];?>" size=40></td>
 		</tr>
 		<tr>
 			<td valign="top" align="left" colspan=2>
-				<textarea name="CURLOPT_POSTFIELDS" style="width: 100%;border: 1px solid #ccc;" rows=5 placeholder="variable to post, separate by = and [enter] or & for multiple variables"><?=@htmlentities($_SESSION['CURLOPT_POSTFIELDS']);?></textarea>
+				<textarea name="CURLOPT_POSTFIELDS" style="width: 100%;border: 1px solid #ccc;" rows=5 placeholder="variable to post, separate by = and [enter] or & for multiple variables"><?php echo @htmlentities($_SESSION['CURLOPT_POSTFIELDS']);?></textarea>
 			</td>
 		</tr>
 		<tr>
@@ -27,7 +27,7 @@ if(!isset($_POST['Submit']))
 		</tr>
 		<tr>
 			<td>CURLOPT_USERAGENT</td>
-			<td><input type="text" name="CURLOPT_USERAGENT" value="<?=@$_SERVER['HTTP_USER_AGENT'];?>" size=40></td>
+			<td><input type="text" name="CURLOPT_USERAGENT" value="<?php echo @$_SERVER['HTTP_USER_AGENT'];?>" size=40></td>
 		</tr>
 		<tr>
 			<td>CURLOPT_HTTPHEADER</td>

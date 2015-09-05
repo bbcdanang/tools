@@ -15,7 +15,7 @@ if(!isset($_POST['Submit']))
 		</tr>
 		<tr>
 			<td>path</td>
-			<td>:<input type="text" name="path" value="<?=dirname(__FILE__);?>" size="80"></td>
+			<td>:<input type="text" name="path" value="<?php echo dirname(__FILE__);?>" size="80"></td>
 		</tr>
 		<tr>
 			<td colspan=2>
@@ -41,7 +41,7 @@ if(!isset($_POST['Submit']))
 		{
 			if ($fp = @opendir($source_dir))
 			{
-				$source_dir = rtrim($source_dir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;		
+				$source_dir = rtrim($source_dir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
 				$filedata = array();
 				while (FALSE !== ($file = readdir($fp)))
 				{

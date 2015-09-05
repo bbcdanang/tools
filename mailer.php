@@ -14,7 +14,7 @@ if(!isset($_POST['Submit']))
 			</tr>
 			<tr>
 				<td>Module</td>
-				<td><select name="module_id" class="form-control"><?=createOption($db->getAssoc($q), '');?></select></td>
+				<td><select name="module_id" class="form-control"><?php echo createOption($db->getAssoc($q), '');?></select></td>
 			</tr>
 			<tr>
 				<td>Mail to</td>

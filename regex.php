@@ -101,7 +101,7 @@ function demoChangeScript(obj)
 	</table>
 </FORM>
 
-<?
+<?php
 }else{
 	$r = array('~', '*', '#', '$', '@', '/','&');
 	$s = '';

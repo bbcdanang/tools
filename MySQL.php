@@ -13,7 +13,7 @@ if(!isset($_POST['Submit']))
 		<table width="100%" height="100%" border=0 cellpadding="0" cellspacing="0">
 			<tr>
 				<td valign="top" align="left" style="height:100px;">
-					<?=editor_code($config, '', array(), false);?>
+					<?php echo editor_code($config, '', array(), false);?>
 				</td>
 			</tr>
 			<tr bgcolor=#f0f0f0>
