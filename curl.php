@@ -1,70 +1,97 @@
 <?php  if (!defined('_VALID_BBC')) exit('No direct script access allowed');
 
+$sys->stop(false);
+$sys->set_layout('blank');
 if(!isset($_POST['Submit']))
 {
-?>
-<form action="" name="curl_init" id="curl_init" method="POST" target="curl_init" enctype="multipart/form-data" >
-	<table width="100%" border=0 cellpadding="4" cellspacing="2" class="body">
-		<tr bgcolor=#f0f0f0>
-			<td valign="middle" width="20%">action</td>
-			<td><input type="text" name="action" value="<?php echo @$_SESSION['CURLOPT_ACTION'];?>" size=40></td>
-		</tr>
-		<tr>
-			<td valign="top" align="left" colspan=2>
-				<textarea name="CURLOPT_POSTFIELDS" style="width: 100%;border: 1px solid #ccc;" rows=5 placeholder="variable to post, separate by = and [enter] or & for multiple variables"><?php echo @htmlentities($_SESSION['CURLOPT_POSTFIELDS']);?></textarea>
-			</td>
-		</tr>
-		<tr>
-			<td>OUTPUT</td>
-			<td>
-				<label><input type="checkbox" name="is_plain" value="1" checked> Text Plain</label>
-				<label><input type="checkbox" name="is_debug" value="1" checked> Debug</label>
-			</td>
-		</tr>
-		<tr>
-			<td>CURLOPT_REFERER</td>
-			<td><input type="text" name="CURLOPT_REFERER" value="" size=40></td>
-		</tr>
-		<tr>
-			<td>CURLOPT_USERAGENT</td>
-			<td><input type="text" name="CURLOPT_USERAGENT" value="<?php echo @$_SERVER['HTTP_USER_AGENT'];?>" size=40></td>
-		</tr>
-		<tr>
-			<td>CURLOPT_HTTPHEADER</td>
-			<td>
-				<textarea name="CURLOPT_HTTPHEADER" style="width: 100%;border: 1px solid #ccc;" rows=3>Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-Accept-Language: en-us,en;q=0.5
-Accept-Encoding: gzip,deflate
-Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
-Keep-Alive: 300
-Connection: keep-alive
-Content-Type: application/x-www-form-urlencoded</textarea>
-			</td>
-		</tr>
-		<tr>
-			<td>CURLOPT_FOLLOWLOCATION</td>
-			<td><input type="checkbox" name="CURLOPT_FOLLOWLOCATION" value="1"></td>
-		</tr>
-		<tr>
-			<td>CURLOPT_COOKIEFILE</td>
-			<td><input type="text" name="CURLOPT_COOKIEFILE" value="_COOKIEFILE" size=40></td>
-		</tr>
-		<tr>
-			<td>CURLOPT_COOKIEJAR</td>
-			<td><input type="text" name="CURLOPT_COOKIEJAR" value="_COOKIEFILE" size=40></td>
-		</tr>
-		<tr>
-			<td colspan=2>
-				<input type=submit name="Submit" value="Submit">
-			</td>
-		</tr>
-	</table>
-</form>
-<?php
+	?>
+	<form action="" method="POST" id="curl_init" class="form-horizontal" role="form">
+	<div class="panel panel-default">
+	  <div class="panel-body">
+			<div class="form-group">
+				<input type="text" name="action" value="<?php echo @$_SESSION['CURLOPT_ACTION']; ?>" class="form-control" label="Insert target URL" />
+			</div>
+			<div class="form-group">
+				<textarea name="CURLOPT_POSTFIELDS" rows="3" class="form-control" placeholder="variable to post, separate by = and [enter] or & for multiple variables"><?php echo htmlentities($_SESSION['CURLOPT_POSTFIELDS']);?></textarea>
+			</div>
+			<div class="form-group">
+				<div class="btn-group" data-toggle="buttons">
+				  <label class="btn btn-default active">
+				    <input type="checkbox" name="is_plain" value="1" id="is_plain" checked /> Text Plain
+				  </label>
+				  <label class="btn btn-default">
+				    <input type="checkbox" name="is_debug" value="1" /> Debug
+				  </label>
+				  <label class="btn btn-default" id="follow">
+				    <input type="checkbox" name="CURLOPT_FOLLOWLOCATION" value="1" /> Follow Location
+				  </label>
+				</div>
+			</div>
+			<div class="form-group follow">
+				<label>CURLOPT_REFERER</label>
+				<input type="text" name="CURLOPT_REFERER" value="" class="form-control" />
+			</div>
+			<div class="form-group">
+				<label>CURLOPT_USERAGENT</label>
+				<input type="text" name="CURLOPT_USERAGENT" value="<?php echo @$_SESSION['CURLOPT_USERAGENT']; ?>" class="form-control" />
+			</div>
+			<div class="form-group">
+				<label>CURLOPT_HTTPHEADER</label>
+				<textarea name="CURLOPT_HTTPHEADER" rows="2" class="form-control"><?php echo htmlentities(implode("\n", (array)@$_SESSION['CURLOPT_HTTPHEADER']));?></textarea>
+			</div>
+			<div class="form-group follow">
+				<label>CURLOPT_COOKIEFILE</label>
+				<input type="text" name="CURLOPT_COOKIEFILE" value="_COOKIEFILE" class="form-control" />
+			</div>
+			<div class="form-group follow">
+				<label>CURLOPT_COOKIEJAR</label>
+				<input type="text" name="CURLOPT_COOKIEJAR" value="_COOKIEFILE" class="form-control" />
+			</div>
+			<button type="submit" class="btn btn-lg btn-default">Submit</button>
+	  </div>
+	</div>
+	</form>
+	<div id="curl_output"></div>
+	<div id="loading">Loading...</div>
+	<script type="text/javascript">
+	_Bbc(function($){
+		$(".follow").hide();
+		$("#follow").on("click", function(){
+			if($("input", $(this)).is(":checked")) {
+				$(".follow").hide("slow");
+			}else{
+				$(".follow").show("slow");
+			}
+		});
+			$(document).ajaxStart(function(){
+				$("#loading").show();
+			}).ajaxStop(function(){
+				$("#loading").hide();
+			});
+		$('#curl_init').on("submit", function(e){
+			e.preventDefault();
+			var a = $(this).serialize()+"&Submit=1";
+			$.ajax({
+			  url: document.location.href,
+			  method: "post",
+			  data: a
+			}).done(function(data) {
+				if ($("#is_plain").is(":checked")) {
+					data = "<pre>"+data+"</pre>";
+				};
+				$("#curl_output").html(data);
+			});
+		});
+	});
+	</script>
+	<?php
 }else{
 	if (!preg_match('~^(?:ht|f)tps?://~is', $_POST['action'])) {
 		$_POST['action'] = 'http://'.$_POST['action'];
 	}
+	$_SESSION['CURLOPT_HTTPHEADER'] = $_POST['CURLOPT_HTTPHEADER'];
+	$_SESSION['CURLOPT_POSTFIELDS'] = $_POST['CURLOPT_POSTFIELDS'];
+	$_SESSION['CURLOPT_ACTION'] = $_POST['action'];
 	if(!empty($_POST['CURLOPT_POSTFIELDS']))
 	{
     $r = explode("\n", preg_replace("~\n{2,}~is", "\n", str_replace("\r", "\n",$_POST['CURLOPT_POSTFIELDS'])));
@@ -105,8 +132,7 @@ Content-Type: application/x-www-form-urlencoded</textarea>
 	if (!$debug) {
 		echo $out;
 	}
-	$_SESSION['CURLOPT_POSTFIELDS'] = $_POST['CURLOPT_POSTFIELDS'];
-	$_SESSION['CURLOPT_ACTION'] = $_POST['action'];
+	die();
 }
 /* $param == (int)cache in second | (array)POST Fields*/
 function curl($url, $param=array(), $option=array(), $is_debug = true)
@@ -134,7 +160,7 @@ function curl($url, $param=array(), $option=array(), $is_debug = true)
     'CURLOPT_REFERER'       => !empty($_SESSION['CURLOPT_REFERER']) ? $_SESSION['CURLOPT_REFERER'] : $url
   , 'CURLOPT_POST'          => empty($param) ? 0 : 1
   , 'CURLOPT_POSTFIELDS'    => $param
-  , 'CURLOPT_USERAGENT'     => 'Mozilla/5.0 (Linux; U; Android 2.1; en-us; Nexus One Build/ERD62) AppleWebKit/530.17 (KHTML, like Gecko) Version/4.0 Mobile Safari/530.17'
+  , 'CURLOPT_USERAGENT'     => @$_SERVER['HTTP_USER_AGENT']
   , 'CURLOPT_HEADER'        => 1
   , 'CURLOPT_HTTPHEADER'    => array(
 		  'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
