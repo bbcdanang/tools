@@ -9,10 +9,10 @@ if(!isset($_POST['Submit']))
 	<div class="panel panel-default">
 	  <div class="panel-body">
 			<div class="form-group">
-				<input type="text" name="action" value="<?php echo @$_SESSION['CURLOPT_ACTION']; ?>" class="form-control" label="Insert target URL" />
+				<input type="text" name="action" value="<?php echo @$_SESSION['CURLOPT_ACTION']; ?>" class="form-control" placeholder="Insert target URL" />
 			</div>
 			<div class="form-group">
-				<textarea name="CURLOPT_POSTFIELDS" rows="3" class="form-control" placeholder="variable to post, separate by = and [enter] or & for multiple variables"><?php echo htmlentities($_SESSION['CURLOPT_POSTFIELDS']);?></textarea>
+				<textarea name="CURLOPT_POSTFIELDS" rows="3" class="form-control" placeholder="variable to post, separate by = and [enter] or & for multiple variables"><?php echo @htmlentities($_SESSION['CURLOPT_POSTFIELDS']);?></textarea>
 			</div>
 			<div class="form-group">
 				<div class="btn-group" data-toggle="buttons">
@@ -28,24 +28,19 @@ if(!isset($_POST['Submit']))
 				</div>
 			</div>
 			<div class="form-group follow">
-				<label>CURLOPT_REFERER</label>
-				<input type="text" name="CURLOPT_REFERER" value="" class="form-control" />
+				<input type="text" name="CURLOPT_REFERER" value="" class="form-control" placeholder="CURLOPT_REFERER" />
 			</div>
 			<div class="form-group">
-				<label>CURLOPT_USERAGENT</label>
-				<input type="text" name="CURLOPT_USERAGENT" value="<?php echo @$_SESSION['CURLOPT_USERAGENT']; ?>" class="form-control" />
+				<input type="text" name="CURLOPT_USERAGENT" placeholder="CURLOPT_USERAGENT" value="<?php echo @$_SESSION['CURLOPT_USERAGENT']; ?>" class="form-control" />
 			</div>
 			<div class="form-group">
-				<label>CURLOPT_HTTPHEADER</label>
-				<textarea name="CURLOPT_HTTPHEADER" rows="2" class="form-control"><?php echo htmlentities(implode("\n", (array)@$_SESSION['CURLOPT_HTTPHEADER']));?></textarea>
+				<textarea name="CURLOPT_HTTPHEADER" placeholder="CURLOPT_HTTPHEADER" rows="2" class="form-control"><?php echo htmlentities(implode("\n", (array)@$_SESSION['CURLOPT_HTTPHEADER']));?></textarea>
 			</div>
 			<div class="form-group follow">
-				<label>CURLOPT_COOKIEFILE</label>
-				<input type="text" name="CURLOPT_COOKIEFILE" value="_COOKIEFILE" class="form-control" />
+				<input type="text" name="CURLOPT_COOKIEFILE" placeholder="CURLOPT_COOKIEFILE" value="_COOKIEFILE" class="form-control" />
 			</div>
 			<div class="form-group follow">
-				<label>CURLOPT_COOKIEJAR</label>
-				<input type="text" name="CURLOPT_COOKIEJAR" value="_COOKIEFILE" class="form-control" />
+				<input type="text" name="CURLOPT_COOKIEJAR" placeholder="CURLOPT_COOKIEJAR" value="_COOKIEFILE" class="form-control" />
 			</div>
 			<button type="submit" class="btn btn-lg btn-default">Submit</button>
 	  </div>
@@ -130,7 +125,7 @@ if(!isset($_POST['Submit']))
 	unset($option['action'], $option['Submit'], $option['is_plain'], $option['is_debug']);
 	$out = curl($url, $_POST['CURLOPT_POSTFIELDS'], $option, $debug);
 	if (!$debug) {
-		echo $out;
+		echo htmlentities($out);
 	}
 	die();
 }
