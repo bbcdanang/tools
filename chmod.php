@@ -2,39 +2,41 @@
 
 if(!isset($_POST['Submit']))
 {
-?>
-<form action="" method="POST" enctype="multipart/form-data" target="output">
-	<table width="100%" height="100%" border=0 cellpadding="0" cellspacing="0">
-		<tr>
-			<td width="50">file</td>
-			<td>:<input type="text" name="file" value="644" maxlength="3" /></td>
-		</tr>
-		<tr>
-			<td>directory</td>
-			<td>:<input type="text" name="directory" value="755" maxlength="3" /></td>
-		</tr>
-		<tr>
-			<td>path</td>
-			<td>:<input type="text" name="path" value="<?php echo dirname(__FILE__);?>" size="80"></td>
-		</tr>
-		<tr>
-			<td colspan=2>
-				<input type=submit name="Submit" value="Execute">
-			</td>
-		</tr>
-		<tr>
-			<td colspan=2>
-				<iframe src="" name="output" width="100%" height="100%" frameborder=0></iframe>
-			</td>
-		</tr>
-	</table>
-</form>
-<?php
+	$sys->stop(FALSE);
+	$sys->set_layout("blank");
+	?>
+	<form action="" method="POST" enctype="multipart/form-data" target="output">
+		<table width="100%" height="100%" border=0 cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+					<div class="form-group">
+						<label>File</label>
+						<input type="text" name="file" value="644" maxlength="3" class="form-control" />
+					</div>
+					<div class="form-group">
+						<label>Directory</label>
+						<input type="text" name="directory" value="755" maxlength="3" class="form-control" />
+					</div>
+					<div class="form-group">
+						<label>Path</label>
+						<input type="text" name="path" value="<?php echo __DIR__; ?>" class="form-control" />
+					</div>
+					<input type=submit name="Submit" value="Execute" class="btn btn-default" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<iframe src="" name="output" width="100%" height="100%" frameborder=0></iframe>
+				</td>
+			</tr>
+		</table>
+	</form>
+	<?php
 } else {
-	$file= intval(0 . intval( $_POST['file'], 10),8);//'0'.intval($_POST['file']);
-	$dir = intval(0 . intval( $_POST['directory'], 10),8);//'0'.intval($_POST['directory']);
-	$path= is_dir($_POST['path']) ? $_POST['path'] : dirname(__FILE__);
-	$text= '';
+	$file = intval(0 . intval( $_POST['file'], 10),8);//'0'.intval($_POST['file']);
+	$dir  = intval(0 . intval( $_POST['directory'], 10),8);//'0'.intval($_POST['directory']);
+	$path = is_dir($_POST['path']) ? $_POST['path'] : dirname(__FILE__);
+	$text = '';
 	if ( ! function_exists('path_chmod'))
 	{
 		function path_chmod($source_dir, $c_dir, $c_file, $top_level_only = FALSE)
@@ -56,18 +58,16 @@ if(!isset($_POST['Submit']))
 						$temp_array = path_chmod($source_dir.$file.DIRECTORY_SEPARATOR, $c_dir, $c_file);
 						ob_start();
 							chmod($source_dir.$file, $mode);
-#							echo "chmod($source_dir.$file, $mode)";
+							// echo "chmod($source_dir.$file, $mode)";
 							$o = ob_get_contents();
 						ob_end_clean();
 						if(!empty($o))
 							$filedata[] = $o;
 						$filedata   = array_merge($filedata, $temp_array);
-					}
-					else
-					{
+					} else {
 						ob_start();
 							chmod($source_dir.$file, $mode);
-#							echo "chmod($source_dir.$file, $mode)";
+							// echo "chmod($source_dir.$file, $mode)";
 							$o = ob_get_contents();
 						ob_end_clean();
 						if(!empty($o))
