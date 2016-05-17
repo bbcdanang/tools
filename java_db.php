@@ -19,35 +19,45 @@ if (!empty($_POST['submit']))
 		$vars   = '';
 		$args   = '';
 		$vals   = '';
+		$sqls   = '';
 		$i      = 0;
 		foreach ($fields as $field)
 		{
 			$vars .= '
     public static final String '.$field.' = "'.$field.'";';
+    	$sqls .= ' +
+                ';
     	if ($i)
     	{
 		    $args .= 'String _'.$field.', ';
 		    $vals .= '
         cv.put('.$field.', _'.$field.');';
+      	$type = preg_match('~(_id|status|active)$~is', $field) ? 'INTEGER' : 'VARCHAR';
+    	}else{
+    		$type = 'INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL';
     	}
+  		$sqls .= "\"'\" + {$field} + \"' {$type},\"";
       $i++;
 		}
 		$args = trim(trim($args), ',');
+		$sqls = preg_replace('~(,")$~s', '" + ', $sqls);
 		$txt  = '
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
+import net.fisip.master.db.Helper;
+
 /**
  * Created by danang on '.date('n/j/y').'.
  */
-public class '.$class.' extends DBHelper {
+public class '.$class.' extends Helper {
 
     private static final int DB_VERSION = 1;
     public static final String table = "'.$table.'";'.$vars.'
 
     public '.$class.'(Context context) {
-    		super(context, DB_VERSION, table);
+    		super(context, table, null, DB_VERSION);
     }
 
     public String[] getColumn() {
@@ -61,12 +71,17 @@ public class '.$class.' extends DBHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS \'" + table + "\' (" + getSQLFormat() + ")");
+        db.execSQL(sql());
     }
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + table);
-        db.execSQL("CREATE TABLE IF NOT EXISTS \'" + table + "\' (" + getSQLFormat() + ")");
+        db.execSQL("DROP TABLE IF EXISTS \'" + table + "\'");
+        db.execSQL(sql());
+    }
+    @Override
+    public String sql() {
+    	return "CREATE TABLE \'" + table + "\' ("'.$sqls.'
+                ")";
     }
 }
 ';
@@ -97,7 +112,7 @@ $sys->set_layout('blank');
 	<div class="form-group">
 		<label for="">Table Name</label>
 		<input type="text" class="form-control" name="table" value="<?php echo @$_POST['table']; ?>" placeholder="Table Name">
-		<div class="block-help">Leave it blank if it is the same as Class Name</div>
+		<div class="help-block">Leave it blank if it is the same as Class Name</div>
 	</div>
 	<button type="submit" name="submit" value="submit" class="btn btn-primary">Create Class</button>
 </form>
