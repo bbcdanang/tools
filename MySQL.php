@@ -32,32 +32,16 @@ if(!isset($_POST['Submit']))
 	<?php
 }else{
 	$db->debug=1;
+	$sys->stop(false);
 	$_POST['sql'] = stripslashes($_POST['sql']);
 	$r = @$db->getAll($_POST['sql']);
-	if($db->resid) echo "eksekusi SQL telah berhasil dijalankan dengan affect :".$db->Affected_rows();
-	else echo "<font color='#ff0000'>eksekusi SQL telah GAGAL dijalankan</font>";
+	if($db->resid){
+		echo msg('eksekusi SQL telah berhasil dijalankan dengan affect: '.items($db->Affected_rows(), 'row'), 'info');
+	}else{
+		echo msg('eksekusi SQL telah GAGAL dijalankan', 'danger');
+	}
 	if(count($r) > 0)
 	{
-		echo 	'<table width="100%" border="1px" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-color:#ccc;">'
-					.	'<tr style="text-align:center;font-weight:bold;">'
-					.		'<td>No.</td>';
-		foreach((array)@$r[0] as $id=>$data)
-		{
-			echo '<td>'.$id.'</td>';
-		}
-		echo		'</tr>';
-		$i = 0;
-		foreach($r as $id => $data)
-		{
-			$i++;
-			echo	'<tr>'
-			 		.		'<td>'.$i.'</td>';
-			foreach($data as $dt)
-			{
-				echo '<td>'.$dt.'</td>';
-			}
-			echo '</tr>';
-		}
-		echo	'</table>';
+		echo table($r, array_keys($r[0]));
 	}
 }

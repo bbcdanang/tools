@@ -1,5 +1,8 @@
 <?php  if (!defined('_VALID_BBC')) exit('No direct script access allowed');
 
+$sys->stop(false);
+$sys->set_layout('blank');
+
 $p = _ROOT.'templates/';
 if (empty($_POST))
 {
@@ -16,15 +19,18 @@ if (empty($_POST))
 	<form id="demomatch" name="demomatch" method="POST" target="output">
 		<table width="100%" height="100%" border=0 cellpadding="0" cellspacing="0">
 			<tr>
-				<td style="height:100px;">
-					<p>
-						<textarea name="files" style="width: 100%;height: 150px;border: 1px solid #ccc;" placeholder="copy files or path to create file .html.php to selected templates"></textarea>
-					</p>
-					<p>
-						Template Name: <select name="template"><?php echo createoption($ar); ?></select>
-						<input name=submit type=submit value="submit" />
-					</p>
-					<iframe src="" frameborder="0" style="width: 100%;height: 450px;border: 1px solid #ccc;" name="output"></iframe>
+				<td style="height:100px; vertical-align:top;">
+					<div class="form-group">
+						<textarea name="files" class="form-control" style="height: 150px;" placeholder="copy files or path to create file .html.php to selected templates"></textarea>
+						<div class="form-inline">
+							<div class="input-group">Template: </div>
+							<select name="template" class="form-control"><?php echo createoption($ar); ?></select>
+							<div class="input-group">
+								<input name=submit type=submit value="submit" class="btn btn-default" />
+							</div>
+						</div>
+					</div>
+					<iframe src="" frameborder="0" style="width: 100%;height: 450px;" name="output"></iframe>
 				</td>
 			</tr>
 		</table>
@@ -96,8 +102,6 @@ if (empty($_POST))
 					}
 					$data[] = $line;
 				}
-				$sys->stop(false);
-				$sys->set_layout('blank');
 				echo '<form method="POST" action="" enctype="multipart/form-data" role="form" style="background-color: #fff;">';
 				echo table($data, $header).$forms;
 				echo '<button type="submit" class="btn btn-primary" name="submit" value="action">Copy those files</button>';

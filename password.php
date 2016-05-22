@@ -1,34 +1,36 @@
-<?php  if (!defined('_VALID_BBC')) exit('No direct script access allowed'); ?>
-<form action="" method="POST" enctype="multipart/form-data" >
-	<table width="100%" border=0 cellpadding="4" cellspacing="2" class="body">
-		<tr>
-			<td valign="top" align="left">
-				words : <input type="text" name="words" value="<?php echo @$_POST['words'];?>">
-			</td>
-			<td valign="top" align="left">
-				salt : <input type="text" name="salt" value="<?php echo @$_POST['salt'];?>">
-			</td>
-		</tr>
-		<tr bgcolor=#f0f0f0>
-			<td valign="middle" width="200px">
-				<input type="radio" name="enc" value="enc" id="actionsql1"<?php  if(@$_POST['enc']!='dec') echo ' checked="checked"'; ?>><label for="actionsql1"> Encrypt</label>
-				<input type="radio" name="enc" value="dec" id="actionsql2"<?php  if(@$_POST['enc']=='dec') echo ' checked="checked"'; ?>><label for="actionsql2"> Decrypt</label>
-			</td>
-			<td>
-				<input type=submit name="Submit" value="Submit">
-				</td>
-			</tr>
-	</table>
-</form>
-<?php
+<?php  if (!defined('_VALID_BBC')) exit('No direct script access allowed');
 
-if(isset($_POST['enc']))
-{
-	if($_POST['enc']=='enc'){
-		echo "Encrypt :<br /><textarea style=\"width: 100%; border:0px\">".encode($_POST['words'], $_POST['salt'])."</textarea>";
-	}else{
-		echo "Decrypt :<br /><textarea style=\"width: 100%; border:0px\">".decode($_POST['words'], $_POST['salt'])."</textarea>";
-	}
-}
-
+$sys->stop(false);
 ?>
+<form action="" method="POST" role="form">
+	<div class="form-group">
+		<label>Words and SALT (if any)</label>
+		<div class="form-inline">
+			<input type="text" name="words" value="<?php echo @$_POST['words'];?>" class="form-control form-inline" placeholder="Insert text">
+			<input type="text" name="salt" value="<?php echo @$_POST['salt'];?>" class="form-control form-inline" placeholder="Insert _SALT if any">
+		</div>
+	</div>
+	<button type="submit" name="Submit" value="encrypt" class="btn btn-info">Encrypt</button>
+	<button type="submit" name="Submit" value="decrypt" class="btn btn-warning">Decrypt</button>
+	<?php
+	if(isset($_POST['Submit']))
+	{
+		?>
+		<br />
+		<br />
+		<div class="form-group">
+		<?php
+		if($_POST['Submit']=='encrypt')
+		{
+			echo '<label>Encrypted :</label>';
+			echo "<textarea class=\"form-control\">".encode($_POST['words'], $_POST['salt'])."</textarea>";
+		}else{
+			echo '<label>Decrypted :</label>';
+			echo "<textarea class=\"form-control\">".decode($_POST['words'], $_POST['salt'])."</textarea>";
+		}
+		?>
+		</div>
+		<?php
+	}
+	?>
+</form>
