@@ -129,7 +129,7 @@ public class '.$class.' extends Helper {
 		return new String[]{'.$colums.'};
 	}
 
-	public boolean Insert('.$args.') {
+	public long Insert('.$args.') {
 		ContentValues cv = new ContentValues();'.$vals.'
 		return Insert(cv);
 	}
