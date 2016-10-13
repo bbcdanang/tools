@@ -160,7 +160,7 @@ function curl($url, $param=array(), $option=array(), $is_debug = true)
   , 'CURLOPT_HTTPHEADER'    => array(
 		  'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
 		, 'Accept-Language: en-US,en;q=0.5'
-		, 'Accept-Encoding: gzip, deflate'
+		// , 'Accept-Encoding: gzip, deflate'
 		, 'Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7'
 		, 'Keep-Alive: 300'
 		, 'Connection: keep-alive'
