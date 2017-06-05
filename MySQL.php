@@ -33,7 +33,6 @@ if(!isset($_POST['Submit']))
 }else{
 	$db->debug=1;
 	$sys->stop(false);
-	$_POST['sql'] = stripslashes($_POST['sql']);
 	$r = @$db->getAll($_POST['sql']);
 	if($db->resid){
 		echo msg('eksekusi SQL telah berhasil dijalankan dengan affect: '.items($db->Affected_rows(), 'row'), 'info');

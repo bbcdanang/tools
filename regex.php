@@ -113,7 +113,7 @@ function demoChangeScript(obj)
 			break;
 		}
 	}
-	$regex = $s.stripslashes($_POST['regex']).$s.$t;
+	$regex = $s.$_POST['regex'].$s.$t;
 	switch($_POST['SUBMIT'])
 	{
 		case 'Test':
