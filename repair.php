@@ -25,6 +25,7 @@ if (!defined('_VALID_BBC'))
 	_func('language');
 	_func('file');
 	_func('path');
+	meta_title('Reset Website', 2);
 }
 /*
 CREATE FUNCTION FOR OLD FRAMEWORK
@@ -39,8 +40,11 @@ if (!function_exists('config_decode')) {
 		return urldecode_r(@unserialize($string));
 	}
 }
-$lang_r = array_keys(lang_assoc());
-$db->debug=1;
+$_URL      = _URL.'tools/repair';
+$lang_r    = array_keys(lang_assoc());
+$sys->stop(false);
+$sys->set_layout(_ROOT.'templates/admin/blank.php');
+$db->debug = 1;
 switch(@$_GET['id'])
 {
 	case 'clean_cache':
@@ -86,8 +90,7 @@ switch(@$_GET['id'])
 	 show_form();
 	break;
 }
-echo '<br />'.date('r');
-echo implode("\n<hr />\n<hr />", (array)$Bbc->debug);
+echo implode('', (array)$Bbc->debug);
 function tools_repair_table($tablename, $parfield = 'par_id', $ordered= '', $r_change = array(), $out_id='')
 {
 	global $db;
@@ -512,7 +515,7 @@ function tools_clean_template()
 	$r = explode(';', $q);
 	foreach($r AS $q)
 	{
-#		$db->Execute($q);
+		// $db->Execute($q);
 	}
 }
 function tools_clean_content()
@@ -998,7 +1001,7 @@ function tools_change_email()
 }
 function show_form()
 {
-	global $db, $Bbc;
+	global $db, $Bbc, $_URL;
 	$arr = array(
 		'clean_cache'    => 'Clean Cache',
 		'clean_module'   => 'Module',
@@ -1010,24 +1013,48 @@ function show_form()
 	);
 	if (!empty($_SESSION['Mpath']))
 	{
-		$arr[] = array('logout' => 'Logout ('.$_SESSION['Mpath'].')');
+		$arr['logout'] = 'Logout ('.$_SESSION['Mpath'].')';
 	}
-	$j	 = 'id';
-	if(isset($Bbc->mod))
-	{
-		$url = $Bbc->mod['circuit'].'.'.$Bbc->mod['task'];
-		$add = (!empty($_GET[$j])) ? '<a href="'.$url.'">&laquo; Back</a> | ' : '';
-		$url.= '&'.$j.'=';
-	}else{
-		$url = $_SERVER['PHP_SELF'];
-		$add = (!empty($_GET[$j])) ? '<a href="'.$url.'">&laquo; Back</a> | ' : '';
-		$url.= '?'.$j.'=';
-	}
-	foreach($arr AS $i => $d)	{	?>
-		<?php echo $add;?><a href="<?php echo $url.$i;?>"><?php echo $d;?></a>
-<?php $add = ' | ';
-	}
-	if(empty($_GET[$j]))
+	?>
+	<nav class="navbar navbar-default navbar-fixed-top">
+	  <div class="container-fluid">
+	    <div class="navbar-header">
+	      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#menu-repair-tools" aria-expanded="false">
+	        <span class="sr-only">Toggle navigation</span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	      </button>
+		  	<?php
+		  	if (!empty($_GET['id']))
+		  	{
+		  		?>
+		      <a class="navbar-brand" href="<?php echo $_URL; ?>"><?php echo icon('triangle-left'); ?> Reset</a>
+		  		<?php
+		  	}
+		  	?>
+	    </div>
+	    <div class="collapse navbar-collapse" id="menu-repair-tools">
+		    <ul class="nav navbar-nav">
+		    	<?php
+		    	foreach ($arr as $i => $d)
+		    	{
+		    		$cls = @$_GET['id']==$i ? ' class="active"' : '';
+		    		?>
+		    		<li<?php echo $cls; ?>><a href="<?php echo $_URL; ?>/<?php echo $i; ?>"><?php echo $d; ?></a></li>
+		    		<?php
+		    	}
+		    	?>
+		    </ul>
+		    <ul class="nav navbar-nav navbar-right">
+		    	<li><a><?php echo date('r'); ?></a></li>
+		    </ul>
+		   </div>
+	  </div>
+	</nav>
+	<div style="padding-top: 70px;"></div>
+	<?php
+	if(empty($_GET['id']))
 	{
   	$db->debug=0;
     $q = "SELECT username, email FROM bbc_account WHERE 1 LIMIT 1";
@@ -1039,77 +1066,115 @@ function show_form()
     $q = "SELECT params FROM bbc_config WHERE module_id=0 AND name='template'";
     $template = config_decode($db->getOne($q));
     $db->debug=1;
-?>
-<br class="clear" />
-<input type="button" name="back" value="Repair Tables" class="button" onclick="return clean_tables('<?php echo $_SERVER['REQUEST_URI'];?>?id=clean_tables');" >
-<input type="text" id="clean_tables" value="bbc_account;bbc_account_temp;bbc_bank;bbc_config;bbc_email;bbc_log;bbc_user;bbc_user_field;bbc_user_group" size=60> nama2 table pisahkan dengan ;
-<script type="text/javascript">
-	function clean_tables(a)
-	{
-		var b = document.getElementById('clean_tables');
-		window.open(a+'&table='+b.value);
-		return false;
-	}
-</script>
-<form action="<?php echo $_SERVER['PHP_SELF'];?>?id=change_salt" method="post">
-	<input type="text" name="code" value="<?php echo md5(rand(0,255));?>" /> <?php echo _ROOT;?>
-</form>
-<form action="<?php echo $_SERVER['PHP_SELF'];?>?id=change_email" method="post">
-  <b>Particular</b><br />
-	User : <input type="text" name="username" value="<?php echo $usr['username'];?>" readonly /><br />
-	Email : <input type="text" name="email" value="<?php echo $usr['email'];?>" /><br />
-	Domain : <input type="text" name="url" value="<?php echo $site['url'];?>" /><br />
-	Email Name : <input type="text" name="eml[name]" value="<?php echo $eml['name'];?>" /><br />
-	Email Address : <input type="text" name="eml[address]" value="<?php echo $eml['address'];?>" /><br />
-	Email Subject : <input type="text" name="eml[subject]" value="<?php echo $eml['subject'];?>" /><br />
-	<input type="submit" name="change_email" value="Change" />
-</form>
-<form action="<?php echo $_SERVER['PHP_SELF'];?>?id=check_template" method="post">
-  <b>Template</b><br />
-<?php
-  _func('path');
-  $path = _ROOT.'templates/'.$template.'/';
-  $r = path_list($path.'css');
-  foreach($r AS $i => $file)
-  {
-    if(preg_match('~\.css$~is', $file))
-    {
-      echo '<label><input type="checkbox" name="css['.$i.']" checked="checked" value="css/'.$file.'" /> '.$file.'</label><br />';
-    }
-  }
-  echo '<br />';
-  $r = path_list($path);
-  foreach($r AS $file)
-  {
-    if(preg_match('~\.(?:php|html?)$~is', $file))
-    {
-      $i++;
-      echo '<label><input type="checkbox" name="css['.$i.']" checked="checked" value="'.$file.'" /> '.$file.'</label><br />';
-    }
-  }
-?>
-  <input type="hidden" name="path" value="<?php echo $path;?>" />
-  <input type="submit" name="change_email" value="Check" />
-</form>
-	<?php
+		?>
+		<div class="form-inline">
+			<button class="btn btn-default" onclick="return clean_tables('<?php echo $_URL;?>/clean_tables');"><?php echo icon('hand-right'); ?> Repair Tables</button>
+			<div class="form-group">
+				<input type="text" id="clean_tables" class="form-control" value="bbc_account;bbc_account_temp;bbc_bank;bbc_config;bbc_email;bbc_log;bbc_user;bbc_user_field;bbc_user_group">
+			</div>
+			<div class="form-control-static">nama2 table pisahkan dengan ;</div>
+		</div>
+		<script type="text/javascript">
+			function clean_tables(a)
+			{
+				document.location.href = a+'&table='+document.getElementById('clean_tables').value;
+				return false;
+			}
+		</script>
+		<br class="clearfix" />
+		<form action="<?php echo $_URL;?>/change_salt" class="form-inline" method="post">
+			<div class="form-group">
+				<button class="btn btn-default" type="submit"><?php echo icon('hand-right'); ?> Change Salt</button>
+				<input type="text" name="code" class="form-control" value="<?php echo md5(rand(0,255));?>" /> <?php echo _ROOT;?>
+			</div>
+		</form>
+		<form action="<?php echo $_URL; ?>/change_email" method="POST" class="form-horizontal" role="form">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">Default Data</h3>
+				</div>
+				<div class="panel-body">
+					<div class="form-inline">
+						<label>User Name : </label>
+						<input type="text" name="username" value="<?php echo $usr['username'];?>" readonly class="form-control" />
+					</div>
+					<div class="form-inline">
+						<label>User Email : </label>
+						<input type="text" name="email" value="<?php echo $usr['email'];?>" class="form-control" />
+					</div>
+					<div class="form-inline">
+						<label>Web Domain : </label>
+						<input type="text" name="url" value="<?php echo $site['url'];?>" class="form-control" />
+					</div>
+					<div class="form-inline">
+						<label>Email Name : </label>
+						<input type="text" name="eml[name]" value="<?php echo $eml['name'];?>" class="form-control" />
+					</div>
+					<div class="form-inline">
+						<label>Email Address : </label>
+						<input type="text" name="eml[address]" value="<?php echo $eml['address'];?>" class="form-control" />
+					</div>
+					<div class="form-inline">
+						<label>Email Subject : </label>
+						<input type="text" name="eml[subject]" value="<?php echo $eml['subject'];?>" class="form-control" />
+					</div>
+				</div>
+				<div class="panel-footer">
+					<button type="submit" name="change_email" value="Change" class="btn btn-default"><?php echo icon('floppy-saved'); ?> Change</button>
+				</div>
+			</div>
+		</form>
+		<form action="<?php echo $_URL;?>/check_template" method="post">
+			<h3>Template "<?php echo $template; ?>"</h3>
+			<ul class="list-group">
+				<?php
+			  _func('path');
+			  $path = _ROOT.'templates/'.$template.'/';
+			  $r = path_list($path.'css');
+			  foreach($r AS $i => $file)
+			  {
+			    if(preg_match('~\.css$~is', $file))
+			    {
+			      echo '<li class="list-group-item"><label><input type="checkbox" name="css['.$i.']" checked="checked" value="css/'.$file.'" /> ./css/'.$file.'</label></li>';
+			    }
+			  }
+			  $r = path_list($path);
+			  foreach($r AS $file)
+			  {
+			    if(preg_match('~\.(?:php|html?)$~is', $file))
+			    {
+			      $i++;
+			      echo '<li class="list-group-item"><label><input type="checkbox" name="css['.$i.']" checked="checked" value="'.$file.'" /> ./'.$file.'</label></li>';
+			    }
+			  }
+				?>
+				<li class="list-group-item"><button type="submit" name="change_email" value="Check" class="btn btn-default"><?php echo icon('check'); ?> Check</button></li>
+			</ul>
+			<input type="hidden" name="path" value="<?php echo $path;?>" />
+		</form>
+		<?php
 	}
 }
 function tools_check_template()
 {
+	global $_URL;
   show_form();
   _func('path');
   _func('file');
   function tools_check_template_image($arr, $add = '')
   {
     $output = array();
-    foreach($arr AS $i => $dt)
+    if (!empty($arr))
     {
-      if(is_array($dt))
-      {
-        $output = array_merge($output, tools_check_template_image($dt, $add.$i.'/'));
-      }else{
-        $output[] = $add.$dt;
-      }
+	    foreach($arr AS $i => $dt)
+	    {
+	      if(is_array($dt))
+	      {
+	        $output = array_merge($output, tools_check_template_image($dt, $add.$i.'/'));
+	      }else{
+	        $output[] = $add.$dt;
+	      }
+	    }
     }
     return $output;
   }
@@ -1152,25 +1217,36 @@ function tools_check_template()
     {
       $line = count($notfound['css']);
       $width= strlen($line)-1;
+      if (empty($width))
+      {
+      	$width = 1;
+      }
       ?>
-      <form action="<?php echo $_SERVER['PHP_SELF'];?>?id=check_template" method="post">
-        <b>Files are exist, not found in templates OR css style</b><br />
-        <textarea name="no" cols=<?php echo $width;?> rows="<?php echo $line;?>" style="float: left;"><?php for($i=1;$i<=$line;$i++) echo "\n".$i;?></textarea>
-        <textarea name="deletes" cols=80 rows="<?php echo $line;?>" style="float: left;"><?php echo implode("\n", $notfound['css']);?></textarea>
-        <input type="hidden" name="inpath" value="<?php echo $path;?>" /><br style="clear: both;" />
-        <input type="submit" name="change_email" value="Delete Those Files" />
+      <form action="<?php echo $_URL;?>/check_template" method="post">
+        <legend>Files are exist, but not found in templates OR css style</legend>
+        <textarea name="no" cols=<?php echo $width;?> rows="<?php echo $line;?>" class="pull-left" style="font-family: courier new; border-right: 0;" readonly><?php for($i=1;$i<=$line;$i++) echo "\n".$i;?></textarea>
+        <textarea name="deletes" cols="120" rows="<?php echo $line;?>" class="pull-left" style="font-family: courier new;border-left: 1px dotted;"><?php echo implode("\n", $notfound['css']);?></textarea>
+        <div class="clearfix"></div>
+        <input type="hidden" name="inpath" value="<?php echo $path;?>" />
+        <div class="form-group">
+        	<button class="btn btn-danger" name="change_email" value="Delete Those Files"><?php echo icon('trash'); ?> Delete Those Files</button>
+        </div>
       </form>
       <?php
     }
     if(!empty($notfound['image']))
     {
-      $line = count($notfound['image']);
+      $line  = count($notfound['image']);
       $width= strlen($line)-1;
+      if (empty($width))
+      {
+      	$width = 1;
+      }
       ?>
-        <b>Image name found in css style OR templates, files are not exists</b><br />
-        <textarea name="no" cols=<?php echo $width;?> rows="<?php echo $line;?>" style="float: left;"><?php for($i=1;$i<=$line;$i++) echo "\n".$i;?></textarea>
-        <textarea name="notexists" cols=80 rows="<?php echo $line;?>" style="float: left;"><?php echo implode("\n", $notfound['image']);?></textarea>
-        <br style="clear: both;" />
+        <legend>Image name found in css style OR templates, files are not exists</legend>
+        <textarea name="no" cols=<?php echo $width;?> rows="<?php echo $line;?>" class="pull-left" style="font-family: courier new; border-right: 0;" readonly><?php for($i=1;$i<=$line;$i++) echo "\n".$i;?></textarea>
+        <textarea name="notexists" cols="120" rows="<?php echo $line;?>" class="pull-left" style="font-family: courier new;border-left: 1px dotted;"><?php echo implode("\n", $notfound['image']);?></textarea>
+        <div class="clearfix"></div>
       <?php
     }
   }else{
