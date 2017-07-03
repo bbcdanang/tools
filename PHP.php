@@ -36,7 +36,6 @@ if(!isset($_POST['Submit']))
 </form>
 <?php
 } else {
-	$_POST['script'] = stripslashes($_POST['script']);
 	if(isset($_POST['use_template']) && $_POST['use_template'] == '1') $sys->stop(false);
 	switch($_POST['actionscript'])
 	{

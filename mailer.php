@@ -41,7 +41,7 @@ if(!isset($_POST['Submit']))
 	</form>
 	<?php
 } else {
-	@eval(stripslashes($_POST['params']));
+	@eval($_POST['params']);
 	$sys->module_id = $_POST['module_id'];
 	$to = array();
 	$r = explode(',', $_POST['mail_to']);

@@ -9,7 +9,7 @@ $_POST['methodQuery'] = isset($_POST['methodQuery']) ? $_POST['methodQuery'] : '
 <form method="post" enctype="multipart/data">
 	<table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber1">
 	  <tr>
-	    <td><textarea name="sql_query" class="text" style="width: 100%;height: 105px;"><?php echo @stripslashes($_POST['sql_query']);?></textarea></td>
+	    <td><textarea name="sql_query" class="text" style="width: 100%;height: 105px;"><?php echo @$_POST['sql_query'];?></textarea></td>
 	  </tr>
 	  <tr>
 	    <td><?php echo createRadio($arr, 'methodQuery', $_POST['methodQuery']);?></td>
