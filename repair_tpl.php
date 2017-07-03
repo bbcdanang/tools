@@ -1,7 +1,7 @@
 <?php  if (!defined('_VALID_BBC')) exit('No direct script access allowed');
 
 $sys->stop(false);
-$sys->set_layout('blank');
+$sys->set_layout(_ROOT.'templates/admin/blank.php');
 
 $p = _ROOT.'templates/';
 if (empty($_POST))
