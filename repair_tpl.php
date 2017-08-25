@@ -46,12 +46,21 @@ if (empty($_POST))
 		}else{
 			$template = @$_POST['template'];
 			$files    = array();
-			$r = explode("\n", $_POST['files']);
+			$r_mst    = defined('_MST') ? explode('|', _MST) : array();
+			$r        = explode("\n", $_POST['files']);
 			foreach ($r as $f)
 			{
 				$f = trim($f);
 				if (!empty($f))
 				{
+					foreach ($r_mst as $p)
+					{
+						$p = trim($p);
+						if (!empty($p))
+						{
+							$f = preg_replace('~^'.preg_quote($p, '~').'~s', '', $f);
+						}
+					}
 					if (!file_exists($f))
 					{
 						$f = _ROOT.$f;
