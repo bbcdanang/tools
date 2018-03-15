@@ -3,11 +3,27 @@
 $sys->stop(false);
 if (!empty($_POST['module']))
 {
-	$r = get_config($_POST['module']);
+	$cfg = array();
+	$r   = get_config($_POST['module']);
 	if (!empty($_POST['config']))
 	{
 		$cfg = explode(',', trim(preg_replace('~([^a-z0-9_\-]+)~is', ',', trim(@$_POST['config'])), ','));
 		$r   = call_user_func_array('config', $cfg);
+	}
+	if (!empty($r) && !empty($cfg))
+	{
+		$cfgs = implode("', '", $cfg);
+		?>
+		<form class="form-horizontal" role="form">
+			<h3>Copy This:</h3>
+			<div class="form-group">
+				<input type="text" class="form-control" onclick="this.select();" value="get_config('<?php echo $_POST['module']; ?>', '<?php echo $cfgs; ?>');" readonly />
+			</div>
+			<div class="form-group">
+				<input type="text" class="form-control" onclick="this.select();" value="config('<?php echo $cfgs; ?>');" readonly />
+			</div>
+		</form>
+		<?php
 	}
 	pr($r);
 	die();
