@@ -43,6 +43,7 @@ if (!function_exists('config_decode')) {
 $_URL      = _URL.'tools/repair';
 $lang_r    = array_keys(lang_assoc());
 $sys->stop(false);
+$sys->link_set(_ROOT.'templates/admin/css/style.css', 'css');
 $sys->set_layout(_ROOT.'templates/admin/blank.php');
 $db->debug = 1;
 switch(@$_GET['id'])
