@@ -37,7 +37,7 @@ if (!empty($_POST['module']))
 				</select>
 			</div>
 			<div class="form-group">
-				<input type="text" name="config" class="form-control" id="config" autocomplete="OFF" placeholder="masukkan code config dan pisahkan dengan koma (Contoh: site,url)">
+				<input type="text" name="config" class="form-control" id="config" autocomplete="OFF" placeholder="Contoh: site,url">
 			</div>
 		</form>
 		<div id="output"></div>
