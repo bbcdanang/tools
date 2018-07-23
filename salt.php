@@ -49,4 +49,5 @@ if (!empty($_POST['client_str']))
 		);
 	}
 }
+iLog($output);
 output_json($output);
