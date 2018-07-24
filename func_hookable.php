@@ -47,9 +47,14 @@ $r_func = array_merge($r_func, $_SESSION['r_func']);
 						$cls = ' active';
 					}
 				}
+				$href = '';
+				if (!in_array($d, $_SESSION['r_func']))
+				{
+					$href = 'http://dev.esoftplay.com/'.$d;
+				}
 				?>
 				<li>
-					<a href="" class="btn btn-sm btn-default function<?php echo $cls; ?>" title="<?php echo $d; ?>"><?php echo $d; ?></a>
+					<a href="<?php echo $href; ?>" class="btn btn-sm btn-default function<?php echo $cls; ?>" title="<?php echo $d; ?>"><?php echo $d; ?></a>
 				</li>
 				<?php
 			}
