@@ -179,7 +179,7 @@ if (!empty($username) && !empty($password))
 					/* TAMBAHKAN FIELD JIKA TIDAK ADA */
 					if (empty($fields2[$name]))
 					{
-						$SQL[] = "ALTER TABLE `{$table}` ADD `{$name}` `{$name}` {$field['Type']} {$field['Null']} {$field['Default']} {$field['Extra']} {$field['Comment']}  AFTER `{$lastname}`";
+						$SQL[] = "ALTER TABLE `{$table}` ADD `{$name}` {$field['Type']} {$field['Null']} {$field['Default']} {$field['Extra']} {$field['Comment']}  AFTER `{$lastname}`";
 					}else
 					/* UBAH FIELD JIKA TIDAK SAMA */
 					if ($field != $fields2[$name])
