@@ -26,7 +26,7 @@ function demoShowMatchClick()
 	{
 		return true;
 	}else{
-	  var re = new RegExp(document.demoMatch.regex.value);
+	  var re = new RegExp(document.demoMatch.regex.value, "g");
 	  var m = re.exec(document.demoMatch.subject.value);
 	  if (m == null) {
 	    alert("No match");

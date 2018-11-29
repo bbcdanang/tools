@@ -160,8 +160,14 @@ if (!empty($username) && !empty($password))
 				foreach ($fields2 as $name => $fields)
 				{
 					$fields2[$name]['Null']   = ($fields2[$name]['Null'] == 'NO') ? 'NOT NULL' : '';
-					$fields2[$name]['Default']= !empty($fields2[$name]['Default']) ? "DEFAULT '{$fields2[$name]['Default']}'" : '';
 					$fields2[$name]['Comment']= !empty($fields2[$name]['Comment']) ? "COMMENT '{$fields2[$name]['Comment']}'" : '';
+					// JIKA DEFAULT VALUE BERUPA FUNCTION MAKA TIDAK PERLU DIKASIH TANDA PETIK
+					if (!empty($fields2[$name]['Default']) && preg_match('~^([A-Z_]+)$~s', $fields2[$name]['Default']))
+					{
+						$fields2[$name]['Default'] = "DEFAULT {$fields2[$name]['Default']}";
+					}else{
+						$fields2[$name]['Default']= !empty($fields2[$name]['Default']) ? "DEFAULT '{$fields2[$name]['Default']}'" : '';
+					}
 				}
 				// /* UBAH URUTAN FIELD JIKA TIDAK SAMA */
 				// $col1    = array_keys($fields1);
