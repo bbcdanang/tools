@@ -153,14 +153,20 @@ if (!empty($username) && !empty($password))
 				/* SESUAIKAN SEMUA VALUE FIELD TABLE */
 				foreach ($fields1 as $name => $fields)
 				{
-					$fields1[$name]['Null']   = ($fields1[$name]['Null'] == 'NO') ? 'NOT NULL' : '';
-					$fields1[$name]['Default']= !empty($fields1[$name]['Default']) ? "DEFAULT '{$fields1[$name]['Default']}'" : '';
-					$fields1[$name]['Comment']= !empty($fields1[$name]['Comment']) ? "COMMENT '{$fields1[$name]['Comment']}'" : '';
+					$fields1[$name]['Null']    = ($fields1[$name]['Null'] == 'NO') ? 'NOT NULL' : '';
+					$fields1[$name]['Comment'] = !empty($fields1[$name]['Comment']) ? "COMMENT '{$fields1[$name]['Comment']}'" : '';
+					// JIKA DEFAULT VALUE BERUPA FUNCTION MAKA TIDAK PERLU DIKASIH TANDA PETIK
+					if (!empty($fields1[$name]['Default']) && preg_match('~^([A-Z_]+)$~s', $fields1[$name]['Default']))
+					{
+						$fields1[$name]['Default'] = "DEFAULT {$fields1[$name]['Default']}";
+					}else{
+						$fields1[$name]['Default']= !empty($fields1[$name]['Default']) ? "DEFAULT '{$fields1[$name]['Default']}'" : '';
+					}
 				}
 				foreach ($fields2 as $name => $fields)
 				{
-					$fields2[$name]['Null']   = ($fields2[$name]['Null'] == 'NO') ? 'NOT NULL' : '';
-					$fields2[$name]['Comment']= !empty($fields2[$name]['Comment']) ? "COMMENT '{$fields2[$name]['Comment']}'" : '';
+					$fields2[$name]['Null']    = ($fields2[$name]['Null'] == 'NO') ? 'NOT NULL' : '';
+					$fields2[$name]['Comment'] = !empty($fields2[$name]['Comment']) ? "COMMENT '{$fields2[$name]['Comment']}'" : '';
 					// JIKA DEFAULT VALUE BERUPA FUNCTION MAKA TIDAK PERLU DIKASIH TANDA PETIK
 					if (!empty($fields2[$name]['Default']) && preg_match('~^([A-Z_]+)$~s', $fields2[$name]['Default']))
 					{
