@@ -435,7 +435,7 @@ if (!empty($username) && !empty($password))
 						{
 							if (empty($index1[$table][$trigger]))
 							{
-								$SQL3[] = "DROP TRIGGER SCHEMA().`{$trigger}`";
+								$SQL3[] = "DROP TRIGGER `{$trigger}`";
 							}
 						}
 					}
