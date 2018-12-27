@@ -111,7 +111,7 @@ if (!empty($username) && !empty($password))
 		}else{
 			$r1  = $DB1->getCol("SHOW TABLES");
 			$r2  = $DB2->getCol("SHOW TABLES");
-			$SQL = array();
+			$SQL = $SQL1 = $SQL2 = $SQL3 = array(); // 1 = DROP, 2 = CREATE, 3 = ALTER
 			$tbl = array(
 				'exist' => array(), // sama2 ada
 				'add'   => array(), // table di db-goal ada tp tidak ada di db-refine
@@ -183,7 +183,7 @@ if (!empty($username) && !empty($password))
 				// 	if ($name!=$col2[$i])
 				// 	{
 				// 		$field = $fields1[$name];
-				// 		$SQL[] = "ALTER TABLE `{$table}` MODIFY COLUMN `{$name}` {$field['Type']} {$field['Null']} {$field['Default']} {$field['Extra']} {$field['Comment']}";
+				// 		$SQL3[] = "ALTER TABLE `{$table}` MODIFY COLUMN `{$name}` {$field['Type']} {$field['Null']} {$field['Default']} {$field['Extra']} {$field['Comment']}";
 				// 	}
 				// }
 				foreach ($fields1 as $name => $field)
@@ -191,12 +191,12 @@ if (!empty($username) && !empty($password))
 					/* TAMBAHKAN FIELD JIKA TIDAK ADA */
 					if (empty($fields2[$name]))
 					{
-						$SQL[] = "ALTER TABLE `{$table}` ADD `{$name}` {$field['Type']} {$field['Null']} {$field['Default']} {$field['Extra']} {$field['Comment']}  AFTER `{$lastname}`";
+						$SQL3[] = "ALTER TABLE `{$table}` ADD `{$name}` {$field['Type']} {$field['Null']} {$field['Default']} {$field['Extra']} {$field['Comment']}  AFTER `{$lastname}`";
 					}else
 					/* UBAH FIELD JIKA TIDAK SAMA */
 					if ($field != $fields2[$name])
 					{
-						$SQL[] = "ALTER TABLE `{$table}` CHANGE `{$name}` `{$name}` {$field['Type']} {$field['Null']} {$field['Default']} {$field['Extra']} {$field['Comment']}";
+						$SQL3[] = "ALTER TABLE `{$table}` CHANGE `{$name}` `{$name}` {$field['Type']} {$field['Null']} {$field['Default']} {$field['Extra']} {$field['Comment']}";
 					}
 					$lastname = $name;
 				}
@@ -205,9 +205,10 @@ if (!empty($username) && !empty($password))
 				{
 					if (empty($fields1[$name]))
 					{
-						$SQL[] = "ALTER TABLE `{$table}` DROP `{$name}`";
+						$SQL3[] = "ALTER TABLE `{$table}` DROP `{$name}`";
 					}
 				}
+
 				/* MASUKKAN SEMUA INDEX FIELD */
 				$index1 = $DB1->getAll("SHOW INDEX FROM `{$table}`");
 				$index2 = $DB2->getAll("SHOW INDEX FROM `{$table}`");
@@ -241,24 +242,24 @@ if (!empty($username) && !empty($password))
 					}else{
 						$indexes2[$data['Key_name']]['fields'][] = $data['Column_name'];
 					}				}
-				// HAPUS YANG TIDAK ADA DI DATABASE 1
+				/* HAPUS YANG TIDAK ADA DI DATABASE 1 */
 				foreach ($indexes2 as $key => $data)
 				{
 					if (empty($indexes1[$key]))
 					{
-						$SQL[] = "ALTER TABLE `{$table}` DROP INDEX `{$key}`";
+						$SQL3[] = "ALTER TABLE `{$table}` DROP INDEX `{$key}`";
 					}
 				}
-				// EDIT JIKA DI DATABASE 1 DAN 2 ADA PERBEDAAN
+				/* EDIT JIKA DI DATABASE 1 DAN 2 ADA PERBEDAAN */
 				foreach ($indexes2 as $key => $data)
 				{
 					if (!empty($indexes1[$key]) && $indexes1[$key]!=$data)
 					{
-						$SQL[] = "ALTER TABLE `{$table}` DROP INDEX `{$key}`";
+						$SQL3[] = "ALTER TABLE `{$table}` DROP INDEX `{$key}`";
 						unset($indexes2[$key]);
 					}
 				}
-				// TAMBAHKAN JIKA TIDAK ADA DI DATABASE 2
+				/* TAMBAHKAN JIKA TIDAK ADA DI DATABASE 2 */
 				foreach ($indexes1 as $key => $data)
 				{
 					if (empty($indexes2[$key]))
@@ -267,44 +268,159 @@ if (!empty($username) && !empty($password))
 						switch ($key)
 						{
 							case 'PRIMARY':
-								$SQL[] = "ALTER TABLE `{$table}` PRIMARY KEY {$fields}";
+								$SQL3[] = "ALTER TABLE `{$table}` PRIMARY KEY {$fields}";
 								break;
 							default:
 								switch ($data['type'])
 								{
 									case 'FULLTEXT':
-										$SQL[] = "ALTER TABLE `{$table}` ADD FULLTEXT INDEX {$fields}";
+										$SQL3[] = "ALTER TABLE `{$table}` ADD FULLTEXT INDEX {$fields}";
 										break;
 									default:
-										$SQL[] = "ALTER TABLE `{$table}` ADD {$data['unique']} INDEX {$fields}";
+										$SQL3[] = "ALTER TABLE `{$table}` ADD {$data['unique']} INDEX {$fields}";
 										break;
 								}
 								break;
 						}
 					}
 				}
-				if (!empty($SQL) && end($SQL) != '')
+			}
+
+			/* MASUKKAN SEMUA CONSTRAINT RELATION TABLE */
+			$index1 = $index2 = array();
+
+			$r = $DB1->getAll("SELECT * FROM `INFORMATION_SCHEMA`.`KEY_COLUMN_USAGE` WHERE `CONSTRAINT_SCHEMA`=SCHEMA() AND `REFERENCED_TABLE_NAME` IS NOT NULL");
+			foreach ($r as $d)
+			{
+				$index1[$d['TABLE_NAME']][$d['CONSTRAINT_NAME']] = $d;
+			}
+			$r = $DB2->getAll("SELECT * FROM `INFORMATION_SCHEMA`.`KEY_COLUMN_USAGE` WHERE `CONSTRAINT_SCHEMA`=SCHEMA() AND `REFERENCED_TABLE_NAME` IS NOT NULL");
+			foreach ($r as $d)
+			{
+				$index2[$d['TABLE_NAME']][$d['CONSTRAINT_NAME']] = $d;
+			}
+			if ($index1 != $index2)
+			{
+				/* HAPUS CONSTRAINT YANG ADA DI DATABASE 2 JIKA DI DATABASE 1 TIDAK DITEMUKAN*/
+				foreach ($index2 as $table => $fields)
 				{
-					$SQL[] = '';
+					// Jika table yang dihapus index nya tidak masuk dalam daftar table yang dihapus
+					// krn jika termasuk dalam table delete, table tersebut toh nantinya akan terhapus beserta relation schema nya
+					if (!in_array($table, $tbl['del']))
+					{
+						foreach ($fields as $field => $d)
+						{
+							if (empty($index1[$table][$field]))
+							{
+								$SQL3[] = "ALTER TABLE `{$table}` DROP FOREIGN KEY `{$d['CONSTRAINT_NAME']}`";
+							}
+						}
+					}
 				}
+				/* MASUKKAN CONSTRAINT KE DATABASE 2 JIKA ADA DI DATABASE 1 TAPI TIDAK DITEMUKAN DI DATABASE 2 */
+				foreach ($index1 as $table => $fields)
+				{
+					// Jika table yang akan ditambahkan relation tidak masuk ke dalam table yang di create
+					// krn jika termasuk table create, maka relation tsb sudah masuk dalam query create table beserta relation schema nya
+					if (!in_array($table, $tbl['add']))
+					{
+						foreach ($fields as $field => $d)
+						{
+							if (empty($index2[$table][$field]))
+							{
+								$DEL  = 'CASCADE';
+								$UPT  = 'CASCADE';
+								$data = $DB1->getRow("SELECT * FROM `INFORMATION_SCHEMA`.`REFERENTIAL_CONSTRAINTS` WHERE `CONSTRAINT_SCHEMA`=SCHEMA() AND `CONSTRAINT_NAME`='{$d['CONSTRAINT_NAME']}'");
+								if (!empty($data['DELETE_RULE']))
+								{
+									$DEL = $data['DELETE_RULE'];
+									$UPT = $data['UPDATE_RULE'];
+								}
+								$SQL3[] = "ALTER TABLE `{$table}` ADD CONSTRAINT `{$d['CONSTRAINT_NAME']}` FOREIGN KEY (`{$d['COLUMN_NAME']}`) REFERENCES `{$d['REFERENCED_TABLE_NAME']}` (`{$d['REFERENCED_COLUMN_NAME']}`) ON DELETE {$DEL} ON UPDATE {$UPT}";
+							}
+						}
+					}
+				}
+			}
+			/* MASUKKAN SEMUA TRIGGERS */
+			$index1 = $index2 = array();
+
+			$r = $DB1->getAll("SELECT * FROM `INFORMATION_SCHEMA`.`TRIGGERS` WHERE `TRIGGER_SCHEMA`=SCHEMA()");
+			foreach ($r as $d)
+			{
+				$index1[$d['EVENT_OBJECT_TABLE']][$d['TRIGGER_NAME']] = $d;
+			}
+			$r = $DB2->getAll("SELECT * FROM `INFORMATION_SCHEMA`.`TRIGGERS` WHERE `TRIGGER_SCHEMA`=SCHEMA()");
+			foreach ($r as $d)
+			{
+				$index2[$d['EVENT_OBJECT_TABLE']][$d['TRIGGER_NAME']] = $d;
+			}
+			if ($index1 != $index2)
+			{
+				/* HAPUS TRIGGERS YANG ADA DI DATABASE 2 JIKA DI DATABASE 1 TIDAK DITEMUKAN*/
+				foreach ($index2 as $table => $triggers)
+				{
+					// Jika table yang dihapus trigger nya tidak masuk dalam daftar table yang dihapus
+					// krn jika termasuk dalam table delete, table tersebut toh nantinya akan terhapus beserta trigger nya
+					if (!in_array($table, $tbl['del']))
+					{
+						foreach ($triggers as $trigger => $d)
+						{
+							if (empty($index1[$table][$trigger]))
+							{
+								$SQL3[] = "DROP TRIGGER SCHEMA().`{$trigger}`";
+							}
+						}
+					}
+				}
+				/* MASUKKAN TRIGGERS KE DATABASE 2 JIKA ADA DI DATABASE 1 TAPI TIDAK DITEMUKAN DI DATABASE 2 */
+				$SQL4 = array();
+				foreach ($index1 as $table => $triggers)
+				{
+					// Jika table yang akan ditambahkan triggers tidak masuk ke dalam table yang di create
+					// krn jika termasuk table create, maka triggers tsb sudah masuk dalam query create table beserta triggers schema nya
+					if (!in_array($table, $tbl['add']))
+					{
+						foreach ($triggers as $trigger => $d)
+						{
+							if (empty($index2[$table][$trigger]))
+							{
+								$SQL4[] = "CREATE TRIGGER `{$trigger}` {$d['ACTION_TIMING']} {$d['EVENT_MANIPULATION']} ON `{$table}` FOR EACH {$d['ACTION_ORIENTATION']} {$d['ACTION_STATEMENT']};;";
+							}
+						}
+					}
+				}
+			}
+			if (!empty($SQL4))
+			{
+				$SQL3[] = "DELIMITER ;;";
+				$SQL3[] = implode('\n', $SQL4);
+				$SQL3[] = "DELIMITER ;";
 			}
 			/* HAPUS TABLE YANG TIDAK ADA DI DATABASE 1 */
 			foreach ($tbl['del'] as $table)
 			{
-				$SQL[] = "DROP TABLE `{$table}`";
-			}
-
-			if (!empty($SQL) && end($SQL) != '')
-			{
-				$SQL[] = '';
+				$SQL1[] = "DROP TABLE `{$table}`";
 			}
 
 			/* TAMBAHKAN TABLE YANG YANG TIDAK ADA DI DATABASE 2 */
 			foreach ($tbl['add'] as $table)
 			{
 				$data  = $DB1->getAssoc("SHOW CREATE TABLE `{$table}`");
-				$SQL[] = preg_replace(["~\n~s", '~\s+AUTO_INCREMENT=[0-9]+~'], ['\n', ''], $data[$table]);
-				$SQL[] = '';
+				$SQL2[] = preg_replace(["~\n~s", '~\s+AUTO_INCREMENT=[0-9]+~'], ['\n', ''], $data[$table]);
+			}
+
+			if (!empty($SQL1))
+			{
+				$SQL = array_merge($SQL, array(''), $SQL1);
+			}
+			if (!empty($SQL2))
+			{
+				$SQL = array_merge($SQL, array(''), $SQL2);
+			}
+			if (!empty($SQL3))
+			{
+				$SQL = array_merge($SQL, array(''), $SQL3);
 			}
 
 
@@ -316,7 +432,7 @@ if (!empty($username) && !empty($password))
 				<div class="container-fluid">
 					<br class="clearfix" />
 					<div class="form-group">
-						<textarea class="form-control" style="min-height: 350px;" onclick="this.select();">SET foreign_key_checks = 0;<?php echo "\n\n".implode("\n", $SQL); ?>SET foreign_key_checks = 1;</textarea>
+						<textarea class="form-control" style="min-height: 350px;" onclick="this.select();">SET foreign_key_checks = 0;<?php echo "\n".implode("\n", $SQL)."\n\n"; ?>SET foreign_key_checks = 1;</textarea>
 					</div>
 				</div>
 				<?php
@@ -331,7 +447,9 @@ function dbsync($a)
 	$a = preg_replace('~\s{2,}~', ' ', $a);
 	$a = str_replace('\n', "\n", $a);
 	$a = trim($a);
-	$a.= !empty($a) ? ';' : '';
-
+	if (!empty($a))
+	{
+		$a .= (substr($a, -1) != ';') ? ';' : '';
+	}
 	return $a;
 }
