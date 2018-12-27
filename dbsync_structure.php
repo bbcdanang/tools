@@ -18,7 +18,7 @@ if (preg_match('~SERVER\'\s{0,}=>\s{0,}\'([^\']+)~s', $txt, $m))
 		}
 	}
 }
-$sys->stop(false);
+// $sys->stop(false);
 if (!empty($username) && !empty($password))
 {
 	if (!empty($_POST['database1']) && !empty($_POST['database2']))
@@ -29,67 +29,130 @@ if (!empty($username) && !empty($password))
 	{
 		$database1 = $database;
 	}
-	?>
-	<form action="" method="POST" class="form" role="form">
-		<div class="container-fluid">
-			<div class="panel-group" id="accordion1">
-				<div class="panel panel-default">
-				  <div class="panel-heading">
-				    <h4 class="panel-title" data-toggle="collapse" data-parent="#accordion1" href="#pea_isHideToolOn1" style="cursor: pointer;">
-				    	Compare 2 Databases
-				    </h4>
-				  </div>
-				  <div id="pea_isHideToolOn1" class="panel-collapse collapse {$display}">
-				    <div class="panel-body">
-							<div class="col-md-6">
-								<div class="form-group">
-									<label>Username</label>
-									<input type="text" name="username" value="<?php echo $username; ?>" class="form-control" placeholder="Username">
+	if (empty($_POST))
+	{
+		$sys->stop(false);
+		$dbs = $db->getCol("SHOW DATABASES");
+		$exc = array('information_schema', 'performance_schema', 'mysql');
+		foreach ($dbs as $i => $d)
+		{
+			if (in_array($d, $exc))
+			{
+				unset($dbs[$i]);
+			}
+		}
+		$dbs = array_values($dbs);
+		?>
+		<form action="" method="POST" class="form" role="form" id="input_form">
+			<div class="container-fluid">
+				<div class="panel-group" id="accordion1">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h4 class="panel-title" data-toggle="collapse" data-parent="#accordion1" href="#pea_isHideToolOn1" style="cursor: pointer;">
+								Compare 2 Databases
+							</h4>
+						</div>
+						<div id="pea_isHideToolOn1" class="panel-collapse collapse {$display}">
+							<div class="panel-body">
+								<div class="col-md-6">
+									<div class="form-group">
+										<label>Username</label>
+										<input type="text" name="username" value="<?php echo $username; ?>" class="form-control" placeholder="Username">
+									</div>
 								</div>
-							</div>
-							<div class="col-md-6">
-								<div class="form-group">
-									<label>Password</label>
-									<input type="text" name="password" value="<?php echo $password; ?>" class="form-control" placeholder="Password">
+								<div class="col-md-6">
+									<div class="form-group">
+										<label>Password</label>
+										<input type="text" name="password" value="<?php echo $password; ?>" class="form-control" placeholder="Password">
+									</div>
 								</div>
 							</div>
 						</div>
-				  </div>
+					</div>
+				</div>
+				<div class="col-md-5">
+					<div class="form-group">
+						<label>Database 1 (goal)</label>
+						<select name="database1" id="database1" class="form-control"><?php echo createOption($dbs, $database1); ?></select>
+					</div>
+				</div>
+				<div class="col-md-1">
+					<h1><a href="#" id="input_reverse"><?php echo icon('transfer'); ?></a></h1>
+				</div>
+				<div class="col-md-6">
+					<div class="form-group">
+						<label>Database 2 (refinement)</label>
+						<select name="database2" id="database2" class="form-control"><?php echo createOption($dbs, $database2); ?></select>
+					</div>
+				</div>
+				<div class="clearfix"></div>
+				<div class="col-md-12">
+					<button type="submit" class="btn btn-primary" name="submit" value="submit">compare</button>
 				</div>
 			</div>
-			<div class="col-md-5">
-				<div class="form-group">
-					<label>Database 1 (goal)</label>
-					<input type="text" name="database1" value="<?php echo @$database1; ?>" class="form-control" placeholder="Database 1">
-				</div>
-			</div>
-			<div class="col-md-1">
-				<h1><a href="#" onclick="return sdfsdfsd();"><?php echo icon('transfer'); ?></a></h1>
-			</div>
-			<div class="col-md-6">
-				<div class="form-group">
-					<label>Database 2 (refinement)</label>
-					<input type="text" name="database2" value="<?php echo @$database2 ?>" class="form-control" placeholder="Database 2">
-				</div>
-			</div>
-			<div class="clearfix"></div>
-			<div class="col-md-12">
-				<button type="submit" class="btn btn-primary" name="submit" value="submit">compare</button>
+		</form>
+		<div class="container-fluid">
+			<br class="clearfix" />
+			<div id="output_msg"></div>
+			<div class="form-group">
+				<textarea class="form-control" style="min-height: 350px;" onclick="this.select();" id="output_query"></textarea>
 			</div>
 		</div>
-	</form>
-	<script type="text/javascript">
-		function sdfsdfsd() {
-			var a = $('input[name="database1"]');
-			var b = $('input[name="database2"]');
-			var c = a.val();
-			var d = b.val();
-			a.val(d);
-			b.val(c);
-			return false;
-		};
-	</script>
-	<?php
+		<script type="text/javascript">
+			_Bbc(function($){
+				$( document ).ajaxStart(function() {
+					$("#loading").show();
+				}).ajaxStop(function() {
+					$("#loading").hide();
+				});
+				$("#input_reverse").on("click", function(e){
+					e.preventDefault();
+					var a = $('#database1');
+					var b = $('#database2');
+					var c = a.val();
+					var d = b.val();
+					a.val(d).trigger("change");
+					b.val(c).trigger("change");
+					return false;
+				});
+				$("input, select, button", $("#input_form")).on("keyup change", function(e){
+					$("#output_msg").html('');
+					$("#output_query").val('');
+				});
+				$("#input_form").on("submit", function(e){
+					e.preventDefault();
+					var x = document.location.href;
+					x += x.indexOf("?") >= 0 ? "&" : "?";
+					x += "is_ajax=1";
+					$.ajax({
+						url: x,
+						method:"POST",
+						data:$(this).serialize(),
+						global:true,
+						dataType:"json",
+						success: function(a){
+							var b = '';
+							var c = '';
+							if (a.ok) {
+								if (a.message) {
+									b = '<div class="alert alert-success" role="alert"><span class="glyphicon glyphicon-ok-sign" title="success"></span> '+a.message+'</div>';
+								}
+								if (a.result) {
+									c = a.result;
+								}
+							}else{
+								b = '<div class="alert alert-danger" role="alert"><span class="glyphicon glyphicon-minus-sign" title="failed"></span> '+a.message+'</div>';
+							}
+							$("#output_msg").html(b);
+							$("#output_query").val(c);
+						}
+					});
+				});
+			});
+		</script>
+		<div id="loading">Loading...</div>
+		<?php
+	}
 	if (!empty($database2))
 	{
 		$err = array();
@@ -107,7 +170,11 @@ if (!empty($username) && !empty($password))
 		}
 		if (!empty($err))
 		{
-			pr($err);
+			$output = array(
+				'ok'      => 0,
+				'message' => implode(' AND ', $err),
+				'result'  => ''
+				);
 		}else{
 			$r1  = $DB1->getCol("SHOW TABLES");
 			$r2  = $DB2->getCol("SHOW TABLES");
@@ -377,16 +444,11 @@ if (!empty($username) && !empty($password))
 				$SQL4 = array();
 				foreach ($index1 as $table => $triggers)
 				{
-					// Jika table yang akan ditambahkan triggers tidak masuk ke dalam table yang di create
-					// krn jika termasuk table create, maka triggers tsb sudah masuk dalam query create table beserta triggers schema nya
-					if (!in_array($table, $tbl['add']))
+					foreach ($triggers as $trigger => $d)
 					{
-						foreach ($triggers as $trigger => $d)
+						if (empty($index2[$table][$trigger]))
 						{
-							if (empty($index2[$table][$trigger]))
-							{
-								$SQL4[] = "CREATE TRIGGER `{$trigger}` {$d['ACTION_TIMING']} {$d['EVENT_MANIPULATION']} ON `{$table}` FOR EACH {$d['ACTION_ORIENTATION']} {$d['ACTION_STATEMENT']};;";
-							}
+							$SQL4[] = "CREATE TRIGGER `{$trigger}` {$d['ACTION_TIMING']} {$d['EVENT_MANIPULATION']} ON `{$table}` FOR EACH {$d['ACTION_ORIENTATION']} {$d['ACTION_STATEMENT']};;";
 						}
 					}
 				}
@@ -423,23 +485,21 @@ if (!empty($username) && !empty($password))
 				$SQL = array_merge($SQL, array(''), $SQL3);
 			}
 
-
 			/* TAMPILKAN HASIL */
+			$output = array(
+				'ok'      => 1,
+				'message' => '',
+				'result'  => ''
+				);
 			if (!empty($SQL))
 			{
 				$SQL = array_map('dbsync', $SQL);
-				?>
-				<div class="container-fluid">
-					<br class="clearfix" />
-					<div class="form-group">
-						<textarea class="form-control" style="min-height: 350px;" onclick="this.select();">SET foreign_key_checks = 0;<?php echo "\n".implode("\n", $SQL)."\n\n"; ?>SET foreign_key_checks = 1;</textarea>
-					</div>
-				</div>
-				<?php
+				$output['result'] = 'SET foreign_key_checks = 0;'."\n".implode("\n", $SQL)."\n\n".'SET foreign_key_checks = 1;';
 			}else{
-				echo '<div class="container-fluid">'.msg('Tidak ada perbedaan struktur dari ke database `'.$database1.'` dan `'.$database2.'`', 'success').'</div>';
+				$output['message'] = 'Tidak ada perbedaan struktur dari ke database `'.$database1.'` dan `'.$database2.'`';
 			}
 		}
+		output_json($output);
 	}
 }
 function dbsync($a)
