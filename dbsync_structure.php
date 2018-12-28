@@ -24,10 +24,12 @@ if (!empty($username) && !empty($password))
 	if (!empty($_POST['database1']) && !empty($_POST['database2']))
 	{
 		extract($_POST);
+		$_SESSION['database1'] = $database1;
+		$_SESSION['database2'] = $database2;
 	}
 	if (empty($database1))
 	{
-		$database1 = $database;
+		$database1 = !empty($_SESSION['database1']) ? $_SESSION['database1'] : $database;
 	}
 	if (empty($_POST))
 	{
@@ -82,7 +84,7 @@ if (!empty($username) && !empty($password))
 				<div class="col-md-6">
 					<div class="form-group">
 						<label>Database 2 (refinement)</label>
-						<select name="database2" id="database2" class="form-control"><?php echo createOption($dbs, $database2); ?></select>
+						<select name="database2" id="database2" class="form-control"><?php echo createOption($dbs, @$_SESSION['database2']); ?></select>
 					</div>
 				</div>
 				<div class="clearfix"></div>
@@ -102,6 +104,8 @@ if (!empty($username) && !empty($password))
 			_Bbc(function($){
 				$( document ).ajaxStart(function() {
 					$("#loading").show();
+					$("#output_msg").html('');
+					$("#output_query").val('');
 				}).ajaxStop(function() {
 					$("#loading").hide();
 				});
