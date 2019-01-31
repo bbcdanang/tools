@@ -60,7 +60,9 @@ switch( $Bbc->mod['task'] )
 	break;
 	default:
 		$file = $Bbc->mod['task'].'.php';
-		if(is_file($file)) {
+		if(is_file($file))
+		{
+			meta_title($Bbc->mod['task'].' - tools', 2);
 			include $file;
 		}
 	break;
