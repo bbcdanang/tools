@@ -11,10 +11,10 @@ if(!isset($_POST['script']))
 		$sys->set_layout('blank');
 		_func('editor');
 		$config = array(
-			'id'         => 'script',
-			'syntax'     => 'php',
-			'syntaxes'   => 'php,html',
-			// 'fullscreen' => true,
+			'id'       => 'script',
+			'syntax'   => 'php',
+			'syntaxes' => 'php,html',
+			'theme'    => 'esoftplay'
 			);
 		?>
 		<table class="table" style="height: 100%;position: absolute;top: 0;left: 0;right: 0;bottom: 0;">
