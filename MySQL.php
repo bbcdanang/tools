@@ -31,16 +31,7 @@ if(!isset($_POST['sql']))
 		</tr>
 	</table>
 	<script type="text/javascript">
-		function focusnow() {
-			window.setTimeout(function(){
-				if (editor1.focus) {
-					editor1.focus();
-				}else{
-					focusnow();
-				}
-			}, 1000);
-		};
-		focusnow();
+		editor1.focus();
 	</script>
 	<?php
 }else{

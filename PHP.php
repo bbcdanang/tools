@@ -13,7 +13,7 @@ if(!isset($_POST['script']))
 		$config = array(
 			'id'       => 'script',
 			'syntax'   => 'php',
-			'syntaxes' => 'php,html',
+			'syntaxes' => 'all',
 			'theme'    => 'esoftplay'
 			);
 		?>
@@ -42,16 +42,7 @@ if(!isset($_POST['script']))
 			</tr>
 		</table>
 		<script type="text/javascript">
-			function focusnow() {
-				window.setTimeout(function(){
-					if (editor1.focus) {
-						editor1.focus();
-					}else{
-						focusnow();
-					}
-				}, 1000);
-			};
-			focusnow();
+			editor1.focus();
 			_Bbc(function($){
 				$("select[name=actionscript]").on("change", function(){
 					var a = $(this).val();
