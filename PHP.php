@@ -42,7 +42,6 @@ if(!isset($_POST['script']))
 			</tr>
 		</table>
 		<script type="text/javascript">
-			editor1.focus();
 			_Bbc(function($){
 				$("select[name=actionscript]").on("change", function(){
 					var a = $(this).val();
@@ -53,6 +52,13 @@ if(!isset($_POST['script']))
 					}
 					editor1.focus();
 				});
+				if (editor1) {
+					editor1.focus();
+				}else{
+					setTimeout(function(){
+						editor1.focus();
+					}, 1000);
+				}
 			});
 		</script>
 		<?php

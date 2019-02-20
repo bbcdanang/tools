@@ -31,7 +31,15 @@ if(!isset($_POST['sql']))
 		</tr>
 	</table>
 	<script type="text/javascript">
-		editor1.focus();
+	_Bbc(function($){
+		if (editor1) {
+			editor1.focus();
+		}else{
+			setTimeout(function(){
+				editor1.focus();
+			}, 1000);
+		}
+	});
 	</script>
 	<?php
 }else{
