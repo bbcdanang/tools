@@ -34,7 +34,7 @@ if (!empty($_POST['target']))
 			if (isset($_POST['val'][$i]))
 			{
 				$val  = $_POST['val'][$i];
-				$test = json_decode($val, 1)
+				$test = json_decode($val, 1);
 				if (!empty($test))
 				{
 					$val = $test;
