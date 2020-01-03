@@ -1,12 +1,13 @@
 <?php  if (!defined('_VALID_BBC')) exit('No direct script access allowed');
 
-if(!isset($_POST['Submit']))
+if(!isset($_POST['module_id']))
 {
 	$sys->stop(false);
 	$sys->set_layout('blank');
+	_func('editor');
 	$q = "SELECT id, name FROM bbc_module ORDER BY name";
 	?>
-	<form action="" method="POST" enctype="multipart/form-data" target="output">
+	<form id="mailform" method="POST" enctype="multipart/form-data">
 		<table class="table">
 			<tr>
 				<td width="100px">Template</td>
@@ -23,7 +24,7 @@ if(!isset($_POST['Submit']))
 			<tr>
 				<td>Params</td>
 				<td style="height:100px;">
-					<textarea name="params" class="form-control" rows=3><?php echo "\$params = array(\n\n);"; ?></textarea>
+					<?php echo editor_code('params', "\$params = array(\n\n);");?>
 				</td>
 			</tr>
 			<tr>
@@ -32,28 +33,47 @@ if(!isset($_POST['Submit']))
 					<input type=submit name="Submit" value="Execute" class="btn btn-default">
 				</td>
 			</tr>
-			<tr>
-				<td colspan=2>
-					<iframe src="" name="output" width="100%" height="100%" frameborder=0></iframe>
-				</td>
-			</tr>
 		</table>
 	</form>
+	<div id="output"></div>
+	<script type="text/javascript">
+	_Bbc(function($){
+		$("#mailform").on("submit", function(e){
+			e.preventDefault();
+			var x = document.location.href;
+			x += x.indexOf("?") >= 0 ? "&" : "?";
+			x += "is_ajax=1";
+			$.ajax({
+				url: x,
+				method:"POST",
+				data:$("#mailform").serialize(),
+				global:true,
+				success: function(a){
+					$("#output").html(a);
+				}
+			});
+		})
+	});
+	</script>
 	<?php
 } else {
+	echo date('r')."<br />";
 	@eval($_POST['params']);
 	$sys->module_id = $_POST['module_id'];
-	$to = array();
-	$r = explode(',', $_POST['mail_to']);
-	foreach($r AS $t) {
+	$to             = array();
+	$r              = explode(',', $_POST['mail_to']);
+	foreach($r AS $t)
+	{
 		$r = explode(';', $t);
-		foreach($r AS $t) {
+		foreach($r AS $t)
+		{
 			if(is_email($t))
+			{
 				$to[] = $t;
+			}
 		}
 	}
+	pr($params, __FILE__.':'.__LINE__);
 	@extract($params);
-	$sys->mail_send($to
-	, $_POST['template']
-	, $debug = true);
+	$sys->mail_send($to, $_POST['template'], $debug = true);
 }

@@ -24,7 +24,7 @@ if (empty($_POST))
 						<textarea name="files" class="form-control" style="height: 150px;" placeholder="copy files or path to create file .html.php to selected templates"></textarea>
 						<div class="form-inline">
 							<div class="input-group">Template: </div>
-							<select name="template" class="form-control"><?php echo createoption($ar); ?></select>
+							<select name="template" class="form-control"><?php echo createoption($ar, config('template')); ?></select>
 							<div class="input-group">
 								<input name=submit type=submit value="submit" class="btn btn-default" />
 							</div>
