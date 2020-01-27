@@ -17,7 +17,9 @@ if(!isset($_POST['sql']))
 				<form action="" method="POST" enctype="multipart/form-data" id="form" target="output">
 					<?php echo editor_code($config, @$_SESSION['tools_sql'], array(), false);?>
 					<div class="form-inline checkbox">
-						<input type=submit name="Submit" value="Submit" class="form-control" />
+						<button type="submit" name="Submit" value="Submit" class="btn btn-default" />
+							Execute<span id="lastpost"></span>
+						</button>
 						<label><input type="checkbox" title="New Window" onclick="document.getElementById('form').target = this.checked ? '_blank' : 'output';" /> New Window</label>
 						<strong>(F1: Display Menu, F2: Toogle fullscreen, F3: Submit form)</strong>
 					</div>
@@ -26,7 +28,20 @@ if(!isset($_POST['sql']))
 		</tr>
 		<tr>
 			<td style="height: 100%;">
-				<iframe src="" name="output" style="width: 100%;height: 100%;border: 0;"></iframe>
+					<script type="text/javascript">
+						function onSubmit(e) {
+							var d = new Date();
+							var t = "d on ";
+							t += d.getHours().toString().length == 1 ? '0'+d.getHours() : d.getHours();
+							t += ":"+(d.getMinutes().toString().length == 1 ? '0'+d.getMinutes() : d.getMinutes());
+							t += ":"+(d.getSeconds().toString().length == 1 ? '0'+d.getSeconds() : d.getSeconds());
+							t += " "+d.getMilliseconds();
+							if (typeof $ == "function") {
+								$("#lastpost").html(t);
+							}
+						};
+					</script>
+				<iframe src="" name="output" onload="onSubmit(this);" style="width: 100%;height: 100%;border: 0;"></iframe>
 			</td>
 		</tr>
 	</table>
