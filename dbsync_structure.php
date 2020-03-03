@@ -279,7 +279,16 @@ if (!empty($username) && !empty($password))
 						$SQL3[] = "ALTER TABLE `{$table}` DROP `{$name}`";
 					}
 				}
-
+				/* TAMBAHKAN COMMENT TABLE */
+				$comment1 = $DB1->getAssoc("SHOW TABLE STATUS WHERE Name='{$table}'");
+				$comment2 = $DB2->getAssoc("SHOW TABLE STATUS WHERE Name='{$table}'");
+				foreach ($comment1 as $key => $comment)
+				{
+					if (!empty($comment['Comment']) && $comment['Comment']!=$comment2[$key]['Comment'])
+					{
+						$SQL3[] = "ALTER TABLE `{$table}` COMMENT = '{$comment['Comment']}'";
+					}
+				}
 				/* MASUKKAN SEMUA INDEX FIELD */
 				$index1 = $DB1->getAll("SHOW INDEX FROM `{$table}`");
 				$index2 = $DB2->getAll("SHOW INDEX FROM `{$table}`");
